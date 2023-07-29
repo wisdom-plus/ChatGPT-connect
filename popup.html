@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <script src="/node_modules/unloosen-ruby-loader/dist/entry/module-popup.esm.js" type="module"></script>
+    <style>
+      body{
+        width: 300px;
+        height: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="tabnum"></p>
+    <form id="form">
+      <fieldset>
+        <lable for='token'>OpenAI token</lable>
+        <input type='text' name='token' id='token'>
+        <lable for='prompt'>prompt</lable>
+        <textarea rows='5' name='prompt' id='prompt'></textarea>
+        <button id="unloosen-button">submit</button>
+      </fieldset>
+    </form>
+  </body>
+</html>
+
+

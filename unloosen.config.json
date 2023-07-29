@@ -4,6 +4,7 @@
   "remote-require": false,
   "content-script-entry": "node_modules/unloosen-ruby-loader/dist/entry/module-content-script.esm.js",
   "sandbox-entry": "node_modules/unloosen-ruby-loader/dist/entry/module-sandbox.esm.js",
-  "popup-entry": "node_modules/unloosen-ruby-loader/dist/entry/module-popup.esm.js"
+  "popup-entry": "node_modules/unloosen-ruby-loader/dist/entry/module-popup.esm.js",
+  "background-entry": "node_modules/unloosen-ruby-loader/dist/entry/module-background.esm.js" 
 }
 
