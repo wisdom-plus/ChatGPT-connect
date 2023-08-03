@@ -14,39 +14,57 @@ class Utils
 end
 
 def get
-  url = 'https://pokeapi.co/api/v2/pokemon/25/'
-  res = fetch(url).await
-  obj = res.json.await
+  url = 'https://pokeapi.co/api/v2/pokemon/26/'
+  Fiber.new do
+    res = fetch(url).await 
+    obj = res.json.await
+  end.transfer
   return obj
 end
 
+def create_url(num)
+  "https://pokeapi.co/api/v2/pokemon/#{num}/"
+end
+
+
 content_script site: 'www.example.com' do
-  chrome.runtime.onMessage.addListener do |message|
+  console.log('load')
+  chrome.runtime.onMessage.addListener do |name|
+    console.log('content_script')
     h1 = document.querySelector('h1')
-    h1.innerText = message.token
+    h1.innerText = name
   end
 end
 
 popup do
   submit_button = document.querySelector('button#unloosen-button')
   submit_button.addEventListener "click" do |e|
-    token = document.querySelector('input#token').value
-    prompt = document.querySelector('textarea#prompt').value
-    query_object = Utils.build_js_object(active: true, currentWindow: true)
-    chrome.tabs.query(query_object) do |tabs|
-      tab = tabs.at(0)
-      message = Utils.build_js_object(token: token, prompt: prompt)
-      chrome.tabs.sendMessage(tab[:id], message)
-    end
+    Fiber.new do
+      token = document.querySelector('input#token').value
+      prompt = document.querySelector('textarea#prompt').value
+      console.log('popup')
+      query_object = Utils.build_js_object(active: true, currentWindow: true)
+      chrome.tabs.query(query_object) do |tab|
+        tab_id = tab[0]['id']
+        message = Utils.build_js_object(message: 'pika', tab_id: tab_id, id: token)
+        chrome.runtime.sendMessage(message)
+      end
+    end.transfer
     e.preventDefault
   end
 end
 
 background do
-  console.log('OK')
-  chrome.runtime.onMessage.addListener do |message|
-    data = get()
-    console.log(data)
+  console.log('test')
+  chrome.runtime.onMessage.addListener do |message, sender, sendResponce|
+    console.log(message)
+    console.log(message.id)
+    url = create_url(message.id)
+    Fiber.new do
+      res = fetch(url).await 
+      data = res.json.await
+      chrome.tabs.sendMessage(message.tab_id.to_i, data.name)
+    end.transfer
   end
 end
 

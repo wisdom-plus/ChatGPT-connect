@@ -8,22 +8,21 @@
       "js": [
         "node_modules/unloosen-ruby-loader/dist/entry/loader-content-script.esm.js"
       ],
-      "matches": ["http://www.example.com/"]
+      "matches": ["http://www.example.com/"],
+      "run_at": "document_start"
     }
   ],
   "action": {
     "default_popup": "popup.html"
   },
+  "background": {
+      "service_worker": "node_modules/unloosen-ruby-loader/dist/entry/module-background.esm.js",
+      "type": "module"
+  },
   "permissions": [
     "activeTab",
-    "storage",
-    "cookies",
-    "scripting",
-    "https://api.openai.com/"
+    "tabs"
   ],
-  "background": {
-    "service_worker": "app.rb"
-  },
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",
     "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-eval'; object-src 'self';"
