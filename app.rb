@@ -6,6 +6,8 @@ class Utils
     object = JS.global[:Object].call(:call)
 
     kwargs.each do |(key, value)|
+      p key
+      p value
       object[key] = value
     end
 
@@ -13,17 +15,47 @@ class Utils
   end
 end
 
-def get
-  url = 'https://pokeapi.co/api/v2/pokemon/26/'
-  Fiber.new do
-    res = fetch(url).await 
-    obj = res.json.await
-  end.transfer
-  return obj
+def chat_url
+  'https://api.openai.com/v1/chat/completions'
 end
 
-def create_url(num)
-  "https://pokeapi.co/api/v2/pokemon/#{num}/"
+def api_header(apiKey)
+  # header = { 'Content-Type': 'application/json', 'Authorization': "Bearer #{apiKey}"}
+  js_header = Utils.build_js_object('Content-Type': 'application/json', 
+                                    'Authorization': "Bearer #{apiKey}",
+                                    'Access-Control-Allow-Origin': '*',
+                                    'Access-Control-Allow-Headers': 'Origin, X-Requeste-With, Content-Type, Authorization, Accept')
+  return js_header
+end
+
+def api_body(input)
+  #body = {
+  #  messages: [
+  #    {'role': 'user', 'content': input }
+  #  ],
+  #  model: 'gpt-3.5-turbo',
+  #  max_tokens: 500,
+  #  temperature: 1,
+  #  n: 1,
+  #}
+  js_messages = Utils.build_js_object('role': 'user', 'content': input)
+  js_body = Utils.build_js_object(model: 'gpt-3.5-turbo')
+  body = Utils.build_js_object(body: js_body)
+  console.log(body)
+  return js_body
+end
+
+def api_args(apiKey, input)
+  header = api_header(apiKey)
+  body = api_body(input)
+  # args = {
+  #  method: 'POST',
+  #  headers: header,
+  #  body: body
+  # }
+  console.log('args')
+  args = Utils.build_js_object(method: 'POST', headers: header, body: body)
+  return args
 end
 
 
@@ -40,13 +72,13 @@ popup do
   submit_button = document.querySelector('button#unloosen-button')
   submit_button.addEventListener "click" do |e|
     Fiber.new do
-      token = document.querySelector('input#token').value
+      key = document.querySelector('input#key').value
       prompt = document.querySelector('textarea#prompt').value
       console.log('popup')
       query_object = Utils.build_js_object(active: true, currentWindow: true)
       chrome.tabs.query(query_object) do |tab|
         tab_id = tab[0]['id']
-        message = Utils.build_js_object(message: 'pika', tab_id: tab_id, id: token)
+        message = Utils.build_js_object(key: key, input: prompt, tab_id: tab_id)
         chrome.runtime.sendMessage(message)
       end
     end.transfer
@@ -57,13 +89,13 @@ end
 background do
   console.log('test')
   chrome.runtime.onMessage.addListener do |message, sender, sendResponce|
-    console.log(message)
-    console.log(message.id)
-    url = create_url(message.id)
     Fiber.new do
-      res = fetch(url).await 
+      api_arg = api_args(message.key,message.input)
+      console.log(api_arg)
+      res = JS.global.fetch(chat_url,api_arg).await 
       data = res.json.await
-      chrome.tabs.sendMessage(message.tab_id.to_i, data.name)
+      console.log(data)
+      chrome.tabs.sendMessage(message.tab_id.to_i, 'test')
     end.transfer
   end
 end
