@@ -6,8 +6,6 @@ class Utils
     object = JS.global[:Object].call(:call)
 
     kwargs.each do |(key, value)|
-      p key
-      p value
       object[key] = value
     end
 
@@ -29,31 +27,22 @@ def api_header(apiKey)
 end
 
 def api_body(input)
-  #body = {
-  #  messages: [
-  #    {'role': 'user', 'content': input }
-  #  ],
-  #  model: 'gpt-3.5-turbo',
-  #  max_tokens: 500,
-  #  temperature: 1,
-  #  n: 1,
-  #}
-  js_messages = Utils.build_js_object('role': 'user', 'content': input)
-  js_body = Utils.build_js_object(model: 'gpt-3.5-turbo')
-  body = Utils.build_js_object(body: js_body)
-  console.log(body)
-  return js_body
+  body = {
+    messages: [
+      {'role': 'user', 'content': input }
+    ],
+    model: 'gpt-3.5-turbo',
+    max_tokens: 500,
+    temperature: 1,
+    n: 1,
+  }
+  json_body = JSON.generate(body)
+  return json_body
 end
 
 def api_args(apiKey, input)
   header = api_header(apiKey)
   body = api_body(input)
-  # args = {
-  #  method: 'POST',
-  #  headers: header,
-  #  body: body
-  # }
-  console.log('args')
   args = Utils.build_js_object(method: 'POST', headers: header, body: body)
   return args
 end
@@ -91,7 +80,6 @@ background do
   chrome.runtime.onMessage.addListener do |message, sender, sendResponce|
     Fiber.new do
       api_arg = api_args(message.key,message.input)
-      console.log(api_arg)
       res = JS.global.fetch(chat_url,api_arg).await 
       data = res.json.await
       console.log(data)
