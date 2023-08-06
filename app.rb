@@ -50,11 +50,11 @@ end
 
 content_script site: 'www.example.com' do
   console.log('load')
-  chrome.runtime.onMessage.addListener do |name|
-    console.log('content_script')
-    h1 = document.querySelector('h1')
-    h1.innerText = name
-  end
+  #chrome.runtime.onMessage.addListener do |name|
+  #  console.log('content_script')
+  #  h1 = document.querySelector('h1')
+  #  h1.innerText = name
+  #end
 end
 
 popup do
@@ -68,7 +68,9 @@ popup do
       chrome.tabs.query(query_object) do |tab|
         tab_id = tab[0]['id']
         message = Utils.build_js_object(key: key, input: prompt, tab_id: tab_id)
-        chrome.runtime.sendMessage(message)
+        proc = Proc.new { p 'prc' }
+        proc.call
+        chrome.runtime.sendMessage(message, proc.to_js) 
       end
     end.transfer
     e.preventDefault
@@ -77,7 +79,9 @@ end
 
 background do
   console.log('test')
-  chrome.runtime.onMessage.addListener do |message, sender, sendResponce|
+  chrome.runtime.onMessage.addListener do |message, sender, sendResponse|
+    sendResponse.call(:eval)
+    console.log(sendResponse)
     Fiber.new do
       api_arg = api_args(message.key,message.input)
       res = JS.global.fetch(chat_url,api_arg).await 
