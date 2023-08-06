@@ -47,30 +47,34 @@ def api_args(apiKey, input)
   return args
 end
 
-
 content_script site: 'www.example.com' do
   console.log('load')
   chrome.runtime.onMessage.addListener do |name|
     console.log('content_script')
-    h1 = document.querySelector('h1')
-    h1.innerText = name
+    message = Utils.build_js_object(type: 'popup',answer: name)
+    chrome.runtime.sendMessage(message)
   end
 end
 
 popup do
+  chrome.runtime.onMessage.addListener do |message|
+    if message.type == 'popup'
+      console.log('popup')
+      answer_area = document.querySelector('p#answer-area')
+      answer_area.innerText = message.answer
+    end
+  end
   submit_button = document.querySelector('button#unloosen-button')
   submit_button.addEventListener "click" do |e|
     Fiber.new do
       key = document.querySelector('input#key').value
       prompt = document.querySelector('textarea#prompt').value
-      console.log('popup')
       query_object = Utils.build_js_object(active: true, currentWindow: true)
       chrome.tabs.query(query_object) do |tab|
         tab_id = tab[0]['id']
-        message = Utils.build_js_object(key: key, input: prompt, tab_id: tab_id)
-        chrome.runtime.sendMessage(message) do
-          p 'callback'
-        end
+        message = Utils.build_js_object(type: 'background', key: key, input: prompt, tab_id: tab_id)
+        answer_area = document.querySelector('p#answr-area')
+        chrome.runtime.sendMessage(message)
       end
     end.transfer
     e.preventDefault
@@ -79,13 +83,15 @@ end
 
 background do
   console.log('test')
-  chrome.runtime.onMessage.addListener do |message, sender, sendResponse|
-    Fiber.new do
-      api_arg = api_args(message.key,message.input)
-      res = JS.global.fetch(chat_url,api_arg).await 
-      data = res.json.await
-      chrome.tabs.sendMessage(message.tab_id.to_i, data.choices[0].message.content)
-    end.transfer
+  chrome.runtime.onMessage.addListener do |message|
+    if message.type == 'background'
+      Fiber.new do
+        api_arg = api_args(message.key,message.input)
+        res = JS.global.fetch(chat_url,api_arg).await 
+        data = res.json.await
+        chrome.tabs.sendMessage(message.tab_id.to_i, data.choices[0].message.content)
+      end.transfer
+    end
   end
 end
 
