@@ -18,12 +18,10 @@ def chat_url
 end
 
 def api_header(apiKey)
-  # header = { 'Content-Type': 'application/json', 'Authorization': "Bearer #{apiKey}"}
-  js_header = Utils.build_js_object('Content-Type': 'application/json', 
-                                    'Authorization': "Bearer #{apiKey}",
-                                    'Access-Control-Allow-Origin': '*',
-                                    'Access-Control-Allow-Headers': 'Origin, X-Requeste-With, Content-Type, Authorization, Accept')
-  return js_header
+  Utils.build_js_object('Content-Type': 'application/json', 
+                        'Authorization': "Bearer #{apiKey}",
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'Origin, X-Requeste-With, Content-Type, Authorization, Accept')
 end
 
 def api_body(input)
@@ -35,16 +33,13 @@ def api_body(input)
     max_tokens: 500,
     temperature: 1,
     n: 1,
-  }
-  json_body = JSON.generate(body)
-  return json_body
+  }.to_json
 end
 
 def api_args(apiKey, input)
   header = api_header(apiKey)
   body = api_body(input)
-  args = Utils.build_js_object(method: 'POST', headers: header, body: body)
-  return args
+  Utils.build_js_object(method: 'POST', headers: header, body: body)
 end
 
 content_script site: 'www.example.com' do

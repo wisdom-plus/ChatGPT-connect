@@ -1,0 +1,12 @@
+body {
+  width: 450px;
+  height: 400px;
+}
+
+.header {
+  border-bottom: 1px solid #dae1e8;
+  align-items: center;
+  padding: 6px 10p;
+  box-sizing: border-box;
+  height: 48px;
+}
