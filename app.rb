@@ -44,33 +44,26 @@ end
 
 content_script site: 'www.example.com' do
   console.log('load')
-  chrome.runtime.onMessage.addListener do |name|
-    console.log('content_script')
-    message = Utils.build_js_object(type: 'popup',answer: name)
-    chrome.runtime.sendMessage(message)
-  end
 end
 
 popup do
+  submit_button = document.querySelector('button#unloosen-button')
   chrome.runtime.onMessage.addListener do |message|
     if message.type == 'popup'
+      submit_button.disabled = false
       console.log('popup')
       answer_area = document.querySelector('p#answer-area')
       answer_area.innerText = message.answer
     end
   end
-  submit_button = document.querySelector('button#unloosen-button')
   submit_button.addEventListener "click" do |e|
+    submit_button.disabled = true
     Fiber.new do
       key = document.querySelector('input#key').value
       prompt = document.querySelector('textarea#prompt').value
-      query_object = Utils.build_js_object(active: true, currentWindow: true)
-      chrome.tabs.query(query_object) do |tab|
-        tab_id = tab[0]['id']
-        message = Utils.build_js_object(type: 'background', key: key, input: prompt, tab_id: tab_id)
-        answer_area = document.querySelector('p#answr-area')
-        chrome.runtime.sendMessage(message)
-      end
+      message = Utils.build_js_object(type: 'background', key: key, input: prompt)
+      answer_area = document.querySelector('p#answr-area')
+      chrome.runtime.sendMessage(message)
     end.transfer
     e.preventDefault
   end
@@ -83,8 +76,20 @@ background do
       Fiber.new do
         api_arg = api_args(message.key,message.input)
         res = JS.global.fetch(chat_url,api_arg).await 
-        data = res.json.await
-        chrome.tabs.sendMessage(message.tab_id.to_i, data.choices[0].message.content)
+        if res.status.to_i == 200
+          data = res.json.await
+          message = Utils.build_js_object(type: 'popup',answer: data.choices[0].message.content)
+        elsif res.status.to_i == 401
+          message = Utils.build_js_object(type: 'popup',answer: '提供されたAPIkeyが正しくありません')
+        elsif res.status.to_i == 429
+          message = Utils.build_js_object(type: 'popup',answer: 'リクエストのレート制限に達しました')
+        elsif res.status.to_i == 500
+          message = Utils.build_js_object(type: 'popup',answer: 'サーバーでエラーが発生しました')
+        else
+          p res.status
+          message = Utils.build_js_object(type: 'popup',answer: 'apiエラー発生')
+        end
+        chrome.runtime.sendMessage(message)
       end.transfer
     end
   end

@@ -5,22 +5,29 @@
     <link rel='stylesheet' type='text/css' href='popup.css'>
   </head>
   <body>
-    <div class='container mt-2'>
+    <div class='container my-2'>
       <div class='header'>
         <h1 class=''>ChatGPT-connect</h1>
       </div>
       <form id="form" class='mt-2'>
         <div class='mb-3 form-group'>
-          <lable for='key' class='form-label'>OpenAI token</lable>
+          <lable for='key' class='form-label'>OpenAI API Key</lable>
           <input type='password' name='key' id='key' placeholder='OpenAI-API-Key' class='form-control'>
         </div>
         <div class='mb-3 form-group'>
-          <lable for='prompt' class='form-label'>prompt</lable>
+          <lable for='prompt' class='form-label'>Prompt</lable>
           <textarea rows='5' name='prompt' id='prompt' class='form-control' placeholder='ChatGPT prompt'></textarea>
         </div>
         <button type='submit' id="unloosen-button" class='btn btn-primary'>submit</button>
       </form>
-      <p id='answer-area'>answer</p>
+      <div class='card'>
+        <div class='card-header'>
+          ChatGPT Answer
+        </div>
+        <div class='card-body'>
+          <p class='card-text' id='answer-area'></p>
+        </div>
+      </div>
     </div>
   </body>
 </html>
