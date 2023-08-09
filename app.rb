@@ -42,16 +42,11 @@ def api_args(apiKey, input)
   Utils.build_js_object(method: 'POST', headers: header, body: body)
 end
 
-content_script site: 'www.example.com' do
-  console.log('load')
-end
-
 popup do
   submit_button = document.querySelector('button#unloosen-button')
   chrome.runtime.onMessage.addListener do |message|
     if message.type == 'popup'
       submit_button.disabled = false
-      console.log('popup')
       answer_area = document.querySelector('p#answer-area')
       answer_area.innerText = message.answer
     end
@@ -70,7 +65,6 @@ popup do
 end
 
 background do
-  console.log('test')
   chrome.runtime.onMessage.addListener do |message|
     if message.type == 'background'
       Fiber.new do
