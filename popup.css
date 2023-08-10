@@ -1,0 +1,13 @@
+body {
+  width: 380px;
+}
+
+.header {
+  border-bottom: 2px solid #dae1e8;
+  height: 44px;
+}
+
+#answer-area {
+  min-height: 100px;
+}
+

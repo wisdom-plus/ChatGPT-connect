@@ -7,16 +7,24 @@
     {
       "js": [
         "node_modules/unloosen-ruby-loader/dist/entry/loader-content-script.esm.js"
-      ]
+      ],
+      "matches": ["http://www.example.com/"],
+      "run_at": "document_start"
     }
   ],
   "action": {
     "default_popup": "popup.html"
   },
+  "background": {
+      "service_worker": "node_modules/unloosen-ruby-loader/dist/entry/module-background.esm.js",
+      "type": "module"
+  },
   "permissions": [
     "activeTab",
-    "storage",
-    "cookies"
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://api.openai.com/"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",
