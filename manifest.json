@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ChatGPT-connect",
   "description": "ChatGPT Connect is a Chrome extension that enhances your browsing experience by providing real-time answers to questions, supporting text-based tasks, and facilitating efficient information retrieval.",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "content_scripts": [
     {
       "js": [
@@ -12,16 +12,23 @@
       "run_at": "document_start"
     }
   ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_title": "ChatGPT-connect",
+    "default_icon": "icons/icon16.png"
   },
   "background": {
       "service_worker": "node_modules/unloosen-ruby-loader/dist/entry/module-background.esm.js",
       "type": "module"
   },
   "permissions": [
-    "activeTab",
-    "tabs"
+    "tabs",
+    "favicon"
   ],
   "host_permissions": [
     "https://api.openai.com/"
