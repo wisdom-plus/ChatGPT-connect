@@ -44,6 +44,7 @@ end
 
 popup do
   submit_button = document.querySelector('button#unloosen-button')
+
   chrome.runtime.onMessage.addListener do |message|
     if message.type == 'popup'
       submit_button.disabled = false
@@ -51,6 +52,7 @@ popup do
       answer_area.innerText = message.answer
     end
   end
+
   submit_button.addEventListener "click" do |e|
     submit_button.disabled = true
     Fiber.new do
@@ -80,7 +82,6 @@ background do
         elsif res.status.to_i == 500
           message = Utils.build_js_object(type: 'popup',answer: 'サーバーでエラーが発生しました')
         else
-          p res.status
           message = Utils.build_js_object(type: 'popup',answer: 'apiエラー発生')
         end
         chrome.runtime.sendMessage(message)
