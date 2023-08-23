@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ChatGPT-connect",
   "description": "ChatGPT Connect, a Chrome extension, offers real-time answers, supports text tasks, and optimizes info retrieval.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "content_scripts": [
     {
       "js": [
