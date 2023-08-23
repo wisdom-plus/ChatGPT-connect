@@ -36,7 +36,6 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "*",
         "node_modules/unloosen-ruby-loader/dist/**"
       ],
       "matches": ["<all_urls>"]
